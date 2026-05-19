@@ -1,23 +1,47 @@
-locals {
-  cluster_name = lower("${var.cluster_name}-${var.cluster_type}")
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 6.45"
+    }
+
+    flux = {
+      source  = "fluxcd/flux"
+      version = "~> 1.8"
+    }
+
+    local = {
+      source  = "hashicorp/local"
+      version = "~> 2.0"
+    }
+  }
 }
 
-locals {
-  kubeconfig_path = try(
-    module.cluster_kind[0].kubeconfig_path,
-    #module.cluster_eks[0].kubeconfig_path
-  )
-  
+provider "aws" {
+  region = var.aws_region
 }
 
-module "cluster_kind" {
-  source = "./modules/cluster-kind"
-  count  = var.cluster_type == "kind" ? 1 : 0
-  name = local.cluster_name
+############################
+# K8S (EKS)
+############################
+
+module "k8s" {
+  source       = "./modules/k8s"
+  cluster_name = var.cluster_name
 }
 
+
+
+/*
+# TLS KEY
+module "tls_private_key" {
+  source = "./modules/tls_private_key"
+}
+
+
+# GITHUB REPO PROVISION
 module "github_repository" {
-  source                   = "./modules/tf-github-repository"
+  source                   = "./modules/github_repository"
   github_owner             = var.GITHUB_OWNER
   github_token             = var.GITHUB_TOKEN
   repository_name          = var.FLUX_GITHUB_REPO
@@ -25,13 +49,34 @@ module "github_repository" {
   public_key_openssh_title = "flux0"
 }
 
-module "tls_private_key" {
-  source = "./modules/tf-hashicorp-tls-keys"
+############################
+# FLUX PROVIDER (CRITICAL)
+############################
+
+provider "flux" {
+  kubernetes = {
+    config_path = module.k8s.kubeconfig_path
   }
 
-module "flux_bootstrap" {
-  source            = "./modules/fluxcd-flux-bootstrap"
-  github_repository = "${var.GITHUB_OWNER}/${var.FLUX_GITHUB_REPO}"
-  private_key       = module.tls_private_key.private_key_pem
-  config_path       = module.cluster_kind[0].kubeconfig_path
+  git = {
+    url = "ssh://git@github.com/${var.GITHUB_OWNER}/${var.FLUX_GITHUB_REPO}.git"
+
+    ssh = {
+      username    = "git"
+      private_key = module.tls_private_key.public_key_openssh
+    }
+  }
 }
+
+# FLUX BOOTSTRAP MODULE
+
+module "fluxcd" {
+  source       = "./modules/fluxcd"
+  cluster_name = var.cluster_name
+  depends_on = [
+    module.k8s,
+    module.github_repository,
+    module.tls_private_key
+  ]
+}
+*/
