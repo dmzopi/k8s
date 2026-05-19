@@ -1,0 +1,30 @@
+# Terraform
+# Local .terraform directory (contains binaries and plugins)
+.terraform/
+.terraform.lock.hcl
+# State files (may contain sensitive data/secrets)
+*.tfstate
+*.tfstate.backup
+*.tfstate.lock.info
+
+# Variable files (often contain secrets; ignore by default)
+*.tfvars
+*.tfvars.json
+
+# Local overrides
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# CLI configuration and crash logs
+.terraformrc
+terraform.rc
+crash.log
+
+##
+todo.txt
+
+###
+
+*-kubeconfig
