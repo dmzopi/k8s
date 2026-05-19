@@ -32,7 +32,7 @@ module "k8s" {
 
 
 
-/*
+
 # TLS KEY
 module "tls_private_key" {
   source = "./modules/tls_private_key"
@@ -49,9 +49,7 @@ module "github_repository" {
   public_key_openssh_title = "flux0"
 }
 
-############################
-# FLUX PROVIDER (CRITICAL)
-############################
+# FLUX PROVIDER
 
 provider "flux" {
   kubernetes = {
@@ -63,7 +61,7 @@ provider "flux" {
 
     ssh = {
       username    = "git"
-      private_key = module.tls_private_key.public_key_openssh
+      private_key = module.tls_private_key.private_key_pem
     }
   }
 }
@@ -79,4 +77,3 @@ module "fluxcd" {
     module.tls_private_key
   ]
 }
-*/
