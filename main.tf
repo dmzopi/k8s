@@ -1,45 +1,24 @@
-terraform {
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 6.45"
-    }
-
-    flux = {
-      source  = "fluxcd/flux"
-      version = "~> 1.8"
-    }
-
-    local = {
-      source  = "hashicorp/local"
-      version = "~> 2.0"
-    }
-  }
-}
-
+# Kubernetes
+## Provider config
 provider "aws" {
   region = var.aws_region
 }
-
-############################
-# K8S (EKS)
-############################
-
+# Cluster rollout
 module "k8s" {
   source       = "./modules/k8s"
   cluster_name = var.cluster_name
 }
 
-
-
-
-# TLS KEY
+# Generate TLS
 module "tls_private_key" {
   source = "./modules/tls_private_key"
 }
 
-
-# GITHUB REPO PROVISION
+# GitHub repo provision
+provider "github" {
+  owner = var.GITHUB_OWNER
+  token = var.GITHUB_TOKEN
+}
 module "github_repository" {
   source                   = "./modules/github_repository"
   github_owner             = var.GITHUB_OWNER
@@ -47,10 +26,11 @@ module "github_repository" {
   repository_name          = var.FLUX_GITHUB_REPO
   public_key_openssh       = module.tls_private_key.public_key_openssh
   public_key_openssh_title = "flux0"
+  depends_on = [module.tls_private_key]
 }
 
-# FLUX PROVIDER
-
+# FluxCD
+## Provider config
 provider "flux" {
   kubernetes = {
     config_path = module.k8s.kubeconfig_path
@@ -65,9 +45,7 @@ provider "flux" {
     }
   }
 }
-
-# FLUX BOOTSTRAP MODULE
-
+# Bootstrap 
 module "fluxcd" {
   source       = "./modules/fluxcd"
   cluster_name = var.cluster_name

@@ -5,6 +5,7 @@
 # State files (may contain sensitive data/secrets)
 *.tfstate
 *.tfstate.backup
+*.tfstate*backup
 *.tfstate.lock.info
 
 # Variable files (often contain secrets; ignore by default)

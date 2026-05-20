@@ -16,9 +16,7 @@ module "eks" {
   # Optional: Adds the current caller identity as an administrator via cluster access entry
   enable_cluster_creator_admin_permissions = true
 
-  # -------------------------
   # EKS ADDONS
-  # -------------------------
   addons = {
     vpc-cni = {
       before_compute = true
@@ -35,11 +33,11 @@ module "eks" {
     default = {
       name = "ng-eks"
 
-      instance_types = ["t3.medium"]
+      instance_types = [var.worker_nodes_type]
 
-      min_size     = 1
-      max_size     = 2
-      desired_size = 1
+      min_size     = var.worker_nodes_min
+      max_size     = var.worker_nodes_max
+      desired_size = var.worker_nodes_desired
     }
   }
 

@@ -5,7 +5,6 @@ variable "aws_region" {
 variable "cluster_name" {
     type = string
 }
-
 variable "vpc_cidr" {
   description = "CIDR Block"
   type        = string
@@ -26,4 +25,21 @@ variable "public_subnets" {
     "public_subnet_2" = 2
     "public_subnet_3" = 3
   }
+}
+
+variable "worker_nodes_min" {
+  type    = string
+  default = "1"
+}
+variable "worker_nodes_max" {
+  type    = string
+  default = "1"
+}
+variable "worker_nodes_desired" {
+  type    = string
+  default = "1"
+}
+variable "worker_nodes_type" {
+  type    = string
+  default = "t3.medium"
 }

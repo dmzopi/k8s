@@ -1,8 +1,3 @@
-provider "github" {
-  owner = var.github_owner
-  token = var.github_token
-}
-
 resource "github_repository" "this" {
   name       = var.repository_name
   visibility = var.repository_visibility
